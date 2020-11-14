@@ -4,6 +4,8 @@ import mod.vemerion.greedygnomes.ModInit;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
+import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -33,15 +35,17 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	public static DefaultAttributeContainer.Builder createAttributes() {
 		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0D)
-				.add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2);
+				.add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1);
 	}
 
 	@Override
 	protected void initGoals() {
 		goalSelector.add(1, new SwimGoal(this));
+		goalSelector.add(2, new MeleeAttackGoal(this, 2.0D, true));
 		goalSelector.add(5, new WanderAroundFarGoal(this, 1));
 		goalSelector.add(11, new LookAtEntityGoal(this, PlayerEntity.class, 10.0F));
 		goalSelector.add(7, new LookAroundGoal(this));
+		targetSelector.add(1, (new RevengeGoal(this, getClass())).setGroupRevenge());
 
 	}
 
