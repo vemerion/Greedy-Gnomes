@@ -7,6 +7,7 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * Created using Tabula 8.0.0
@@ -86,6 +87,14 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> {
 	@Override
 	public void setAngles(GreedyGnomeEntity entity, float limbAngle, float limbDistance, float animationProgress,
 			float headYaw, float headPitch) {
+		rightArm.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 2f * limbDistance * 0.5f;
+		leftArm.pitch = MathHelper.cos(limbAngle * 0.6662f) * 2f * limbDistance * 0.5f;
+		rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662f) * 1.4f * limbDistance;
+		leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 1.4f * limbDistance;
+
+		head.pitch = headPitch * 0.0175f;
+	    head.yaw = headYaw * 0.005f;
+
 
 	}
 }
