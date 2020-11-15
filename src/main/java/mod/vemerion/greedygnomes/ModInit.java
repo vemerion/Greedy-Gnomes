@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -19,9 +21,13 @@ public class ModInit implements ModInitializer {
 			FabricEntityTypeBuilder.<GreedyGnomeEntity>create(SpawnGroup.CREATURE, GreedyGnomeEntity::new)
 					.dimensions(EntityDimensions.fixed(0.75f, 1.75f)).build());
 
+	public static final Item GREEDY_GNOME_BUNDLE_ITEM = Registry.register(Registry.ITEM,
+			new Identifier(MODID, "greedy_gnome_bundle_item"),
+			new Item(new Item.Settings().group(ItemGroup.SEARCH).maxCount(1)));
+
 	@Override
 	public void onInitialize() {
-        FabricDefaultAttributeRegistry.register(GREEDY_GNOME, GreedyGnomeEntity.createAttributes());
+		FabricDefaultAttributeRegistry.register(GREEDY_GNOME, GreedyGnomeEntity.createAttributes());
 
 	}
 
