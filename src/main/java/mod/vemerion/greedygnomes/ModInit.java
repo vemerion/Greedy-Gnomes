@@ -1,7 +1,13 @@
 package mod.vemerion.greedygnomes;
 
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+
 import mod.vemerion.greedygnomes.entity.GreedyGnomeEntity;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
+import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
@@ -9,6 +15,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.loot.ConstantLootTableRange;
+import net.minecraft.loot.condition.RandomChanceLootCondition;
+import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -25,10 +34,23 @@ public class ModInit implements ModInitializer {
 			new Identifier(MODID, "greedy_gnome_bundle_item"),
 			new Item(new Item.Settings().group(ItemGroup.SEARCH).maxCount(1)));
 
+	private static final Set<Identifier> LOOT_TABLES = ImmutableSet.of(
+			new Identifier("minecraft", "chests/abandoned_mineshaft"),
+			new Identifier("minecraft", "chests/simple_dungeon"),
+			new Identifier("minecraft", "chests/stronghold_corridor"));
+
 	@Override
 	public void onInitialize() {
 		FabricDefaultAttributeRegistry.register(GREEDY_GNOME, GreedyGnomeEntity.createAttributes());
 
+		LootTableLoadingCallback.EVENT.register((resourceManager, lootManager, id, supplier, setter) -> {
+			if (LOOT_TABLES.contains(id)) {
+				FabricLootPoolBuilder builder = FabricLootPoolBuilder.builder().rolls(ConstantLootTableRange.create(1))
+						.withCondition(RandomChanceLootCondition.builder(0.2f).build())
+						.withEntry(ItemEntry.builder(GREEDY_GNOME_BUNDLE_ITEM).build());
+				supplier.pool(builder);
+			}
+		});
 	}
 
 }
