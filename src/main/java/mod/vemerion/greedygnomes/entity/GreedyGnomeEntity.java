@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -40,6 +41,11 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	private static final TrackedData<ItemStack> QUEST = DataTracker.registerData(GreedyGnomeEntity.class,
 			TrackedDataHandlerRegistry.ITEM_STACK);
+	private static final TrackedData<Boolean> COLLECTING = DataTracker.registerData(GreedyGnomeEntity.class,
+			TrackedDataHandlerRegistry.BOOLEAN);
+
+	private int collectingProgress;
+	private int prevCollectingProgress;
 
 	public GreedyGnomeEntity(EntityType<GreedyGnomeEntity> entityType, World world) {
 		super(entityType, world);
@@ -70,6 +76,15 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 	protected void initDataTracker() {
 		super.initDataTracker();
 		dataTracker.startTracking(QUEST, new ItemStack(Items.APPLE, 10));
+		dataTracker.startTracking(COLLECTING, false);
+	}
+
+	private void setCollecting(boolean collecting) {
+		dataTracker.set(COLLECTING, collecting);
+	}
+
+	public boolean isCollecting() {
+		return dataTracker.get(COLLECTING);
 	}
 
 	public ItemStack getQuest() {
@@ -86,6 +101,24 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	private ItemStack randomQuest() {
 		return POSSIBLE_QUESTS.get(getRandom().nextInt(POSSIBLE_QUESTS.size())).createQuestInstance(getRandom());
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (world.isClient) {
+			prevCollectingProgress = collectingProgress;
+			if (isCollecting()) {
+				collectingProgress++;
+			} else {
+				collectingProgress = 0;
+				prevCollectingProgress = 0;
+			}
+		}
+	}
+
+	public float getCollectingProgress(float partialTicks) {
+		return MathHelper.lerp(partialTicks, prevCollectingProgress, collectingProgress);
 	}
 
 	private static class CollectQuestItemGoal extends Goal {
@@ -116,6 +149,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 		@Override
 		public void stop() {
+			gnome.setCollecting(false);
 		}
 
 		@Override
@@ -132,35 +166,40 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 			if (nearbyQuestItem != target) {
 				collectingTimer = 40;
-			} else if (collectingTimer-- < 0) {
-				if (target.getStack().getItem() == Items.GOLD_INGOT) {
-					target.getStack().decrement(1);
-					gnome.changeQuest();
-				} else {
-					ItemStack questStack = gnome.getQuest();
-					Item questItem = questStack.getItem();
-					int decrement = Math.min(questStack.getCount(), target.getStack().getCount());
-					questStack.decrement(decrement);
-					target.getStack().decrement(decrement);
-
-					// Quest completed
-					if (questStack.isEmpty()) {
-						if (questItem == ModInit.GREEDY_GNOME_BUNDLE_ITEM) {
-							GreedyGnomeEntity fromBundle = new GreedyGnomeEntity(gnome.world);
-							Vec3d spawnPos = randomNearbyPos();
-							fromBundle.updatePosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-							gnome.world.spawnEntity(fromBundle);
-						} else {
-							LookTargetUtil.give(gnome, new ItemStack(Items.DIAMOND),
-									randomNearbyPos().add(0.0D, 1.0D, 0.0D));
-						}
+			} else {
+				if (collectingTimer-- < 0) {
+					gnome.setCollecting(false);
+					if (target.getStack().getItem() == Items.GOLD_INGOT) {
+						target.getStack().decrement(1);
 						gnome.changeQuest();
 					} else {
-						gnome.setQuest(new ItemStack(questItem, questStack.getCount())); // Update quest to client
+						ItemStack questStack = gnome.getQuest();
+						Item questItem = questStack.getItem();
+						int decrement = Math.min(questStack.getCount(), target.getStack().getCount());
+						questStack.decrement(decrement);
+						target.getStack().decrement(decrement);
+
+						// Quest completed
+						if (questStack.isEmpty()) {
+							if (questItem == ModInit.GREEDY_GNOME_BUNDLE_ITEM) {
+								GreedyGnomeEntity fromBundle = new GreedyGnomeEntity(gnome.world);
+								Vec3d spawnPos = randomNearbyPos();
+								fromBundle.updatePosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+								gnome.world.spawnEntity(fromBundle);
+							} else {
+								LookTargetUtil.give(gnome, new ItemStack(Items.DIAMOND),
+										randomNearbyPos().add(0.0D, 1.0D, 0.0D));
+							}
+							gnome.changeQuest();
+						} else {
+							gnome.setQuest(new ItemStack(questItem, questStack.getCount())); // Update quest to client
+						}
 					}
+					target = null;
+					return;
+				} else {
+					gnome.setCollecting(true);
 				}
-				target = null;
-				return;
 			}
 			target = nearbyQuestItem;
 		}
