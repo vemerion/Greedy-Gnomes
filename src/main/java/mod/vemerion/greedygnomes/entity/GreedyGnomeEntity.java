@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class GreedyGnomeEntity extends PathAwareEntity {
@@ -65,7 +66,6 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	}
 
-	// TODO: Sync quest properly to client
 	@Override
 	protected void initDataTracker() {
 		super.initDataTracker();
@@ -91,11 +91,13 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 	private static class CollectQuestItemGoal extends Goal {
 
 		private GreedyGnomeEntity gnome;
+		private Random rand;
 		private ItemEntity target;
 		private int collectingTimer;
 
 		public CollectQuestItemGoal(GreedyGnomeEntity gnome) {
 			this.gnome = gnome;
+			this.rand = gnome.getRandom();
 			this.setControls(EnumSet.of(Goal.Control.MOVE));
 		}
 
@@ -119,44 +121,53 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		@Override
 		public void tick() {
 			List<ItemEntity> nearbyQuestItems = getNearbyQuestItems();
-			if (!nearbyQuestItems.isEmpty()) {
-				ItemEntity nearbyQuestItem = nearbyQuestItems.get(0);
-				gnome.getNavigation().startMovingTo(nearbyQuestItems.get(0), (double) 1.2F);
-				if (nearbyQuestItem.squaredDistanceTo(gnome) < 4) {
-					if (nearbyQuestItem != target) {
-						collectingTimer = 40;
-					} else {
-						if (collectingTimer-- < 0) {
-							if (target.getStack().getItem() == Items.GOLD_INGOT) {
-								target.getStack().decrement(1);
-								gnome.changeQuest();
-							} else {
-								ItemStack questStack = gnome.getQuest();
-								Item questItem = questStack.getItem();
-								int decrement = Math.min(questStack.getCount(), target.getStack().getCount());
-								System.out.println(decrement);
-								questStack.decrement(decrement);
-								target.getStack().decrement(decrement);
+			if (nearbyQuestItems.isEmpty())
+				return;
 
-								// Quest completed
-								if (questStack.isEmpty()) {
-									if (questItem == ModInit.GREEDY_GNOME_BUNDLE_ITEM) {
-										GreedyGnomeEntity fromBundle = new GreedyGnomeEntity(gnome.world);
-										fromBundle.updatePosition(gnome.getX(), gnome.getY(), gnome.getZ());
-										gnome.world.spawnEntity(fromBundle);
-									} else {
-										LookTargetUtil.give(gnome, new ItemStack(Items.DIAMOND),
-												gnome.getPos().add(0.0D, 1.0D, 0.0D));
-									}
-									gnome.changeQuest();
-								}
-							}
-							target = null;
+			ItemEntity nearbyQuestItem = nearbyQuestItems.get(0);
+			gnome.getNavigation().startMovingTo(nearbyQuestItems.get(0), (double) 1.2F);
+
+			if (nearbyQuestItem.squaredDistanceTo(gnome) > 4)
+				return;
+
+			if (nearbyQuestItem != target) {
+				collectingTimer = 40;
+			} else if (collectingTimer-- < 0) {
+				if (target.getStack().getItem() == Items.GOLD_INGOT) {
+					target.getStack().decrement(1);
+					gnome.changeQuest();
+				} else {
+					ItemStack questStack = gnome.getQuest();
+					Item questItem = questStack.getItem();
+					int decrement = Math.min(questStack.getCount(), target.getStack().getCount());
+					questStack.decrement(decrement);
+					target.getStack().decrement(decrement);
+
+					// Quest completed
+					if (questStack.isEmpty()) {
+						if (questItem == ModInit.GREEDY_GNOME_BUNDLE_ITEM) {
+							GreedyGnomeEntity fromBundle = new GreedyGnomeEntity(gnome.world);
+							Vec3d spawnPos = randomNearbyPos();
+							fromBundle.updatePosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+							gnome.world.spawnEntity(fromBundle);
+						} else {
+							LookTargetUtil.give(gnome, new ItemStack(Items.DIAMOND),
+									randomNearbyPos().add(0.0D, 1.0D, 0.0D));
 						}
+						gnome.changeQuest();
+					} else {
+						gnome.setQuest(new ItemStack(questItem, questStack.getCount())); // Update quest to client
 					}
-					target = nearbyQuestItem;
 				}
+				target = null;
+				return;
 			}
+			target = nearbyQuestItem;
+		}
+
+		private Vec3d randomNearbyPos() {
+			return new Vec3d(gnome.getX() + rand.nextDouble() * 0.4 - 0.2, gnome.getY(),
+					gnome.getZ() + rand.nextDouble() * 0.4 - 0.2);
 		}
 
 		private List<ItemEntity> getNearbyQuestItems() {
