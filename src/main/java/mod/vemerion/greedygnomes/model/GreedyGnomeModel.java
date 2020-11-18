@@ -6,13 +6,15 @@ import mod.vemerion.greedygnomes.entity.GreedyGnomeEntity;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.ModelWithArms;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Arm;
 import net.minecraft.util.math.MathHelper;
 
 /**
  * Created using Tabula 8.0.0
  */
-public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> {
+public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> implements ModelWithArms {
 	public ModelPart head;
 	public ModelPart body;
 	public ModelPart leftArm;
@@ -98,6 +100,11 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> {
 			hat1.pivotY = -8 - MathHelper.sin(collectingProgress / 40 * (float) Math.PI) * 20;
 			rightLeg.pitch = 0;
 			leftLeg.pitch = 0;
+		} else {
+			if (entity.handSwinging) {
+				rightArm.pitch = -MathHelper.sin(entity.getHandSwingProgress(tickDelta) * (float) Math.PI * 2f)
+						* (float) Math.toRadians(50) - (float) Math.toRadians(60);
+			}
 		}
 	}
 
@@ -105,7 +112,8 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> {
 	public void setAngles(GreedyGnomeEntity entity, float limbAngle, float limbDistance, float animationProgress,
 			float headYaw, float headPitch) {
 		if (!entity.isCollecting()) {
-			rightArm.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 2f * limbDistance * 0.5f;
+			if (!entity.handSwinging)
+				rightArm.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 2f * limbDistance * 0.5f;
 			leftArm.pitch = MathHelper.cos(limbAngle * 0.6662f) * 2f * limbDistance * 0.5f;
 			rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662f) * 1.4f * limbDistance;
 			leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 1.4f * limbDistance;
@@ -120,5 +128,10 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> {
 			head.yaw = headYaw * 0.005f;
 		}
 
+	}
+
+	@Override
+	public void setArmAngle(Arm arm, MatrixStack matrices) {
+		rightArm.rotate(matrices);		
 	}
 }

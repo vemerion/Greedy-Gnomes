@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 import mod.vemerion.greedygnomes.ModInit;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.ai.brain.task.LookTargetUtil;
@@ -50,10 +51,14 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	public GreedyGnomeEntity(EntityType<GreedyGnomeEntity> entityType, World world) {
 		super(entityType, world);
+		
+		equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK));
 	}
 
 	public GreedyGnomeEntity(World world) {
 		super(ModInit.GREEDY_GNOME, world);
+		
+		equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK));
 	}
 
 	public static DefaultAttributeContainer.Builder createAttributes() {
@@ -116,6 +121,8 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 				prevCollectingProgress = 0;
 			}
 		}
+		
+		tickHandSwing();
 	}
 
 	public float getCollectingProgress(float partialTicks) {

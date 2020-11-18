@@ -13,6 +13,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.MobEntityRenderer;
+import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation.Mode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,15 @@ public class GreedyGnomeRenderer extends MobEntityRenderer<GreedyGnomeEntity, Gr
 
 	public GreedyGnomeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		super(entityRenderDispatcher, new GreedyGnomeModel(), 0.2f);
+
+		addFeature(new HeldItemFeatureRenderer<GreedyGnomeEntity, GreedyGnomeModel>(this) {
+			@Override
+			public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i,
+					GreedyGnomeEntity livingEntity, float f, float g, float h, float j, float k, float l) {
+				if (livingEntity.isAttacking())
+					super.render(matrixStack, vertexConsumerProvider, i, livingEntity, f, g, h, j, k, l);
+			}
+		});
 	}
 
 	@Override
@@ -58,8 +68,8 @@ public class GreedyGnomeRenderer extends MobEntityRenderer<GreedyGnomeEntity, Gr
 			Matrix4f matrix4f = matrixStack.peek().getModel();
 			TextRenderer textRenderer = this.getFontRenderer();
 			String text = String.valueOf(questStack.getCount());
-			textRenderer.draw(text, -textRenderer.getWidth(text) / 2, 0, BLACK, false, matrix4f,
-					vertexConsumerProvider, false, TRANSPARENT, i);
+			textRenderer.draw(text, -textRenderer.getWidth(text) / 2, 0, BLACK, false, matrix4f, vertexConsumerProvider,
+					false, TRANSPARENT, i);
 
 			matrixStack.pop();
 			matrixStack.pop();
