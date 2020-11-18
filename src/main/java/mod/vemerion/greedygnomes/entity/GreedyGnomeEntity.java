@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 import mod.vemerion.greedygnomes.ModInit;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.ai.brain.task.LookTargetUtil;
 import net.minecraft.entity.ai.goal.Goal;
@@ -187,8 +188,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 								fromBundle.updatePosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
 								gnome.world.spawnEntity(fromBundle);
 							} else {
-								LookTargetUtil.give(gnome, new ItemStack(Items.DIAMOND),
-										randomNearbyPos().add(0.0D, 1.0D, 0.0D));
+								dropReward();
 							}
 							gnome.changeQuest();
 						} else {
@@ -202,6 +202,16 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 				}
 			}
 			target = nearbyQuestItem;
+		}
+
+		private void dropReward() {
+			for (int i = 0; i < 3; i++) {
+				Vec3d pos = randomNearbyPos();
+				gnome.world.spawnEntity(
+						new ExperienceOrbEntity(gnome.world, pos.getX(), pos.getY(), pos.getZ(), rand.nextInt(5) + 5));
+			}
+			LookTargetUtil.give(gnome, new ItemStack(Items.GOLD_NUGGET, rand.nextInt(8) + 8),
+					randomNearbyPos().add(0.0D, 1.0D, 0.0D));
 		}
 
 		private Vec3d randomNearbyPos() {
