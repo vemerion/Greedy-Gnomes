@@ -1,5 +1,6 @@
 package mod.vemerion.greedygnomes;
 
+import java.awt.Color;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -15,6 +16,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.loot.ConstantLootTableRange;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
@@ -32,7 +34,12 @@ public class ModInit implements ModInitializer {
 
 	public static final Item GREEDY_GNOME_BUNDLE_ITEM = Registry.register(Registry.ITEM,
 			new Identifier(MODID, "greedy_gnome_bundle_item"),
-			new Item(new Item.Settings().group(ItemGroup.SEARCH).maxCount(1)));
+			new Item(new Item.Settings().group(ItemGroup.MISC).maxCount(1)));
+
+	public static final Item GREEDY_GNOME_SPAWN_EGG_ITEM = Registry.register(Registry.ITEM,
+			new Identifier(MODID, "greedy_gnome_spawn_egg_item"),
+			new SpawnEggItem(GREEDY_GNOME, new Color(14, 99, 21).getRGB(), new Color(126, 42, 33).getRGB(),
+					new Item.Settings().group(ItemGroup.MISC)));
 
 	private static final Set<Identifier> LOOT_TABLES = ImmutableSet.of(
 			new Identifier("minecraft", "chests/abandoned_mineshaft"),
