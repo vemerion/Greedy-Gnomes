@@ -7,6 +7,7 @@ import java.util.Random;
 import com.google.common.collect.ImmutableList;
 
 import mod.vemerion.greedygnomes.ModInit;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ExperienceOrbEntity;
@@ -27,9 +28,11 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -48,6 +51,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	private int collectingProgress;
 	private int prevCollectingProgress;
+	private boolean hasSnowball;
 
 	public GreedyGnomeEntity(EntityType<GreedyGnomeEntity> entityType, World world) {
 		super(entityType, world);
@@ -71,6 +75,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		goalSelector.add(1, new SwimGoal(this));
 		goalSelector.add(2, new CollectQuestItemGoal(this));
 		goalSelector.add(3, new MeleeAttackGoal(this, 2.0D, true));
+		goalSelector.add(4, new ThrowSnowballGoal(this));
 		goalSelector.add(5, new WanderAroundFarGoal(this, 1));
 		goalSelector.add(11, new LookAtEntityGoal(this, PlayerEntity.class, 10.0F));
 		goalSelector.add(7, new LookAroundGoal(this));
@@ -114,6 +119,18 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		return POSSIBLE_QUESTS.get(getRandom().nextInt(POSSIBLE_QUESTS.size())).createQuestInstance(getRandom());
 	}
 
+	private void giveSnowball() {
+		this.hasSnowball = true;
+	}
+
+	private void throwSnowball(Entity target) {
+		this.hasSnowball = false;
+		SnowballEntity snowball = new SnowballEntity(world, getX(), getEyeY(), getZ());
+		snowball.setVelocity(target.getX() - getX(), target.getEyeY() - getEyeY(), target.getZ() - getZ(), 0.5f, 0);
+		this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		world.spawnEntity(snowball);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
@@ -131,6 +148,35 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	public float getCollectingProgress(float partialTicks) {
 		return MathHelper.lerp(partialTicks, prevCollectingProgress, collectingProgress);
+	}
+
+	private static class ThrowSnowballGoal extends Goal {
+
+		private GreedyGnomeEntity gnome;
+		private PlayerEntity target;
+
+		private ThrowSnowballGoal(GreedyGnomeEntity gnome) {
+			this.gnome = gnome;
+			this.setControls(EnumSet.of(Goal.Control.MOVE));
+		}
+
+		@Override
+		public boolean canStart() {
+			target = gnome.world.getClosestPlayer(gnome, 7);
+			return target != null && gnome.hasSnowball && gnome.getRandom().nextDouble() < 0.01;
+		}
+
+		@Override
+		public boolean shouldContinue() {
+			return gnome.hasSnowball && target != null;
+		}
+
+		@Override
+		public void start() {
+			if (target != null)
+				gnome.throwSnowball(target);
+		}
+
 	}
 
 	private static class CollectQuestItemGoal extends Goal {
@@ -202,6 +248,8 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 								gnome.world.spawnEntity(fromBundle);
 							} else {
 								dropReward();
+								if (questItem == Items.SNOWBALL)
+									gnome.giveSnowball();
 							}
 							gnome.changeQuest();
 						} else {

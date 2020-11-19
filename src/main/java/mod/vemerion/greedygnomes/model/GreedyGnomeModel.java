@@ -98,8 +98,6 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> implements 
 			rightArm.roll = MathHelper.cos(collectingProgress / 3) * (float) Math.PI / 8 + (float) Math.PI / 6;
 			hat1.pitch = collectingProgress / 20 * (float) Math.PI * 2;
 			hat1.pivotY = -8 - MathHelper.sin(collectingProgress / 40 * (float) Math.PI) * 20;
-			rightLeg.pitch = 0;
-			leftLeg.pitch = 0;
 		} else {
 			if (entity.handSwinging) {
 				rightArm.pitch = -MathHelper.sin(entity.getHandSwingProgress(tickDelta) * (float) Math.PI * 2f)
@@ -111,12 +109,13 @@ public class GreedyGnomeModel extends EntityModel<GreedyGnomeEntity> implements 
 	@Override
 	public void setAngles(GreedyGnomeEntity entity, float limbAngle, float limbDistance, float animationProgress,
 			float headYaw, float headPitch) {
+		rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662f) * 1.4f * limbDistance;
+		leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 1.4f * limbDistance;
+
 		if (!entity.isCollecting()) {
 			if (!entity.handSwinging)
 				rightArm.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 2f * limbDistance * 0.5f;
 			leftArm.pitch = MathHelper.cos(limbAngle * 0.6662f) * 2f * limbDistance * 0.5f;
-			rightLeg.pitch = MathHelper.cos(limbAngle * 0.6662f) * 1.4f * limbDistance;
-			leftLeg.pitch = MathHelper.cos(limbAngle * 0.6662f + (float) Math.PI) * 1.4f * limbDistance;
 			leftArm.yaw = 0;
 			rightArm.yaw = 0;
 			leftArm.roll = 0;
