@@ -51,13 +51,13 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 
 	public GreedyGnomeEntity(EntityType<GreedyGnomeEntity> entityType, World world) {
 		super(entityType, world);
-		
+
 		equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK));
 	}
 
 	public GreedyGnomeEntity(World world) {
 		super(ModInit.GREEDY_GNOME, world);
-		
+
 		equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK));
 	}
 
@@ -74,7 +74,12 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		goalSelector.add(5, new WanderAroundFarGoal(this, 1));
 		goalSelector.add(11, new LookAtEntityGoal(this, PlayerEntity.class, 10.0F));
 		goalSelector.add(7, new LookAroundGoal(this));
-		targetSelector.add(1, (new RevengeGoal(this, getClass())).setGroupRevenge());
+		targetSelector.add(1, new RevengeGoal(this, getClass()) {
+			@Override
+			public boolean shouldContinue() {
+				return super.shouldContinue() && getAttacker() != null;
+			}
+		});
 
 	}
 
@@ -121,7 +126,6 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 				prevCollectingProgress = 0;
 			}
 		}
-		
 		tickHandSwing();
 	}
 
@@ -176,6 +180,8 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 				collectingTimer = 40;
 			} else {
 				if (collectingTimer-- < 0) {
+					gnome.setTarget(null);
+					gnome.setAttacker(null);
 					gnome.setCollecting(false);
 					if (target.getStack().getItem() == Items.GOLD_INGOT) {
 						target.getStack().decrement(1);
