@@ -22,6 +22,7 @@ import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -88,7 +89,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		});
 
 	}
-	
+
 	@Override
 	public void writeCustomDataToTag(CompoundTag tag) {
 		super.writeCustomDataToTag(tag);
@@ -97,7 +98,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		getQuest().toTag(quest);
 		tag.put("quest", quest);
 	}
-	
+
 	@Override
 	public void readCustomDataFromTag(CompoundTag tag) {
 		super.readCustomDataFromTag(tag);
@@ -111,10 +112,14 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		dataTracker.startTracking(QUEST, randomQuest());
 		dataTracker.startTracking(COLLECTING, false);
 	}
-	
+
 	@Override
 	public boolean cannotDespawn() {
 		return true;
+	}
+
+	@Override
+	protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
 	}
 
 	private void setCollecting(boolean collecting) {
