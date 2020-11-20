@@ -32,6 +32,7 @@ import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -87,11 +88,27 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		});
 
 	}
+	
+	@Override
+	public void writeCustomDataToTag(CompoundTag tag) {
+		super.writeCustomDataToTag(tag);
+		tag.putBoolean("hasSnowball", hasSnowball);
+		CompoundTag quest = new CompoundTag();
+		getQuest().toTag(quest);
+		tag.put("quest", quest);
+	}
+	
+	@Override
+	public void readCustomDataFromTag(CompoundTag tag) {
+		super.readCustomDataFromTag(tag);
+		hasSnowball = tag.getBoolean("hasSnowball");
+		setQuest(ItemStack.fromTag(tag.getCompound("quest")));
+	}
 
 	@Override
 	protected void initDataTracker() {
 		super.initDataTracker();
-		dataTracker.startTracking(QUEST, new ItemStack(Items.APPLE, 10));
+		dataTracker.startTracking(QUEST, randomQuest());
 		dataTracker.startTracking(COLLECTING, false);
 	}
 
