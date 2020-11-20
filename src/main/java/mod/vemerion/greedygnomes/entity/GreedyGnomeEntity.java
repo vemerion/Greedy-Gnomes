@@ -111,6 +111,11 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		dataTracker.startTracking(QUEST, randomQuest());
 		dataTracker.startTracking(COLLECTING, false);
 	}
+	
+	@Override
+	public boolean cannotDespawn() {
+		return true;
+	}
 
 	private void setCollecting(boolean collecting) {
 		dataTracker.set(COLLECTING, collecting);

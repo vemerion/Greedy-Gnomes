@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 
 import mod.vemerion.greedygnomes.entity.GreedyGnomeEntity;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -22,7 +23,9 @@ import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.biome.Biome;
 
+@SuppressWarnings("deprecation")
 public class ModInit implements ModInitializer {
 
 	public static final String MODID = "greedy-gnomes";
@@ -46,6 +49,9 @@ public class ModInit implements ModInitializer {
 			new Identifier("minecraft", "chests/simple_dungeon"),
 			new Identifier("minecraft", "chests/stronghold_corridor"));
 
+	private static final Set<Biome.Category> GNOME_BIOMES = ImmutableSet.of(Biome.Category.TAIGA,
+			Biome.Category.FOREST);
+
 	@Override
 	public void onInitialize() {
 		FabricDefaultAttributeRegistry.register(GREEDY_GNOME, GreedyGnomeEntity.createAttributes());
@@ -58,6 +64,9 @@ public class ModInit implements ModInitializer {
 				supplier.pool(builder);
 			}
 		});
+
+		BiomeModifications.addSpawn(ctx -> GNOME_BIOMES.contains(ctx.getBiome().getCategory()), SpawnGroup.CREATURE,
+				GREEDY_GNOME, 5, 1, 2);
 	}
 
 }
