@@ -21,6 +21,7 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.loot.ConstantLootTableRange;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
@@ -29,6 +30,16 @@ import net.minecraft.world.biome.Biome;
 public class ModInit implements ModInitializer {
 
 	public static final String MODID = "greedy-gnomes";
+
+	public static final SoundEvent GNOME_DEATH_SOUND = Registry.register(Registry.SOUND_EVENT,
+			new Identifier(MODID, "gnome_death_sound"), new SoundEvent(new Identifier(MODID, "gnome_death_sound")));
+	public static final SoundEvent GNOME_HIT_SOUND = Registry.register(Registry.SOUND_EVENT,
+			new Identifier(MODID, "gnome_hit_sound"), new SoundEvent(new Identifier(MODID, "gnome_hit_sound")));
+	public static final SoundEvent GNOME_IDLE_SOUND = Registry.register(Registry.SOUND_EVENT,
+			new Identifier(MODID, "gnome_idle_sound"), new SoundEvent(new Identifier(MODID, "gnome_idle_sound")));
+	public static final SoundEvent GNOME_TRADE_SOUND = Registry.register(Registry.SOUND_EVENT,
+			new Identifier(MODID, "gnome_trade_sound"), new SoundEvent(new Identifier(MODID, "gnome_trade_sound")));
+
 
 	public static final EntityType<GreedyGnomeEntity> GREEDY_GNOME = Registry.register(Registry.ENTITY_TYPE,
 			new Identifier(MODID, "greedy_gnome"),

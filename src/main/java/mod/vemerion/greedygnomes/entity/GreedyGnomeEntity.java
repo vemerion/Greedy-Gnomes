@@ -34,6 +34,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -65,6 +66,21 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 		super(ModInit.GREEDY_GNOME, world);
 
 		equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK));
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return ModInit.GNOME_DEATH_SOUND;
+	}
+
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return ModInit.GNOME_IDLE_SOUND;
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(DamageSource source) {
+		return ModInit.GNOME_HIT_SOUND;
 	}
 
 	public static DefaultAttributeContainer.Builder createAttributes() {
@@ -259,6 +275,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 					if (target.getStack().getItem() == Items.GOLD_INGOT) {
 						target.getStack().decrement(1);
 						gnome.changeQuest();
+						gnome.playSound(ModInit.GNOME_TRADE_SOUND, 1, gnome.getSoundPitch());
 					} else {
 						ItemStack questStack = gnome.getQuest();
 						Item questItem = questStack.getItem();
@@ -279,6 +296,7 @@ public class GreedyGnomeEntity extends PathAwareEntity {
 									gnome.giveSnowball();
 							}
 							gnome.changeQuest();
+							gnome.playSound(ModInit.GNOME_TRADE_SOUND, 1, gnome.getSoundPitch());
 						} else {
 							gnome.setQuest(new ItemStack(questItem, questStack.getCount())); // Update quest to client
 						}

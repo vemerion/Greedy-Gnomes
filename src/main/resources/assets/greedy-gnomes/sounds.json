@@ -1,0 +1,38 @@
+{
+  "gnome_death_sound": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "greedy-gnomes:gnome_death_sound",
+        "stream": false
+      }
+    ]
+  },
+  "gnome_hit_sound": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "greedy-gnomes:gnome_hit_sound",
+        "stream": false
+      }
+    ]
+  },
+  "gnome_idle_sound": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "greedy-gnomes:gnome_idle_sound",
+        "stream": false
+      }
+    ]
+  },
+  "gnome_trade_sound": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "greedy-gnomes:gnome_trade_sound",
+        "stream": false
+      }
+    ]
+  }
+}
