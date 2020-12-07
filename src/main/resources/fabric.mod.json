@@ -9,11 +9,12 @@
     "Vemerion"
   ],
   "contact": {
-    "homepage": "",
-    "sources": ""
+    "homepage": "https://github.com/vemerion/Greedy-Gnomes",
+    "sources": "https://github.com/vemerion/Greedy-Gnomes"
   },
 
   "license": "MIT",
+  "icon": "logo.png",
 
   "environment": "*",
   "entrypoints": {
